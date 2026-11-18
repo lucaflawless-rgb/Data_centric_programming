@@ -4,11 +4,20 @@ import matplotlib.pyplot as plt
 import os 
 
 DB_NAME = "golf_data.db"
-CSV_PATH = "Data_centric_programming"
+CSV_PATH = "Data_centric_programming.csv"  
+
+def initialize_database():
+    conn = sqlite3.connect(DB_NAME)
+    if os.path.exists(CSV_PATH):
+        df = pd.read_csv(CSV_PATH)
+        # Clean column names just in case
+        df.columns = df.columns.str.strip()
+        df.to_sql('scores', conn, if_exists='replace', index=False)
+    conn.close()
 
 
 def main():
-    
+    initialize_database()
     select = 0
 
     while select != 4:
@@ -26,27 +35,51 @@ def main():
             print("Please enter a valid number")
             continue
     
-    if (select == 1):
-        {   
+        # ALL menu choices must be INDENTED inside the while loop!
+        if (select == 1):
+            conn = sqlite3.connect(DB_NAME)
+            df = pd.read_sql("SELECT * FROM scores", conn)
+            conn.close()
+            print("\n-----DATA INSPECTION-----")
+            print("1. View all the data")
+            print("2. Filter Data by date")
+            
+            try:
+                option = int(input("Choose option (1 or 2): "))
+            except ValueError:
+                print("Please enter a valid number.")
+                continue
+                
+            if option == 2:
+                print("\nAvailable dates in dataset:")
+                print(df['Date'].unique())
+            
+                user_date = input("Enter a date you wish to see (DD/MM/YYYY): ").strip()
+                filtered_df = df[df['Date'] == user_date]
+            
+                if filtered_df.empty:
+                    print(f"\n[!] No records found for date {user_date}")
+                else:
+                    print(f"\n--- Records for {user_date} ---")
+                    print(filtered_df)
+                    print(f"Number of rows found: {len(filtered_df)}")
+            else:
+                print("\n-----ALL DATA-----")
+                print(df)
+                print(f"Number of rows: {len(df)}")
+                print("Average Score:", df['score'].mean())
+                
+        elif(select == 2):
+            print("\n[Option 2 selected - Work in progress]")
 
-        }
+        elif(select == 3):
+            print("\n[Option 3 selected - Work in progress")
 
-    elif(select == 2):
-        {
+        elif(select == 4):
+            print("\nGoodbye!")
 
-        }
+        else:
+            print("You have selected an invalid option")
 
-    elif(select == 3):
-        {
-
-        }
-
-    elif(select == 4):
-        {
-
-        }
-
-    else:
-        {
-        print("you have selected an invalid option")
-        }       
+if __name__ == "__main__":
+    main()
